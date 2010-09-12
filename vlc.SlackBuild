@@ -5,11 +5,11 @@
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
 
-. /etc/slack-package.conf
+. ../slack-package.conf
 
 NAME=vlc
-VERSION='0.9.8a'
-BUILD=1
+VERSION=1.1.4
+BUILD=${BUILD:-1}
 ARCH=${ARCH:-i486}
 
 CWD=${CWD:-`pwd`}
@@ -34,140 +34,139 @@ mkdir -p $PKG
 
 # Extract the sources
 cd $TMP
-tar -jxvf $CWD/$NAME-$VERSION.tar.bz2 || exit 1
+tar -xvf $CWD/$NAME-$VERSION.tar.bz2 || exit 1
 cd $SRC
 fix_source
 
+# Apply patches
+# Fix NPString members name for Gecko 1.9.1
+( cd projects/mozilla
+  sed -e 's/UTF8Length/utf8length/' \
+      -e 's/UTF8Characters/utf8characters/' \
+      -i.orig *.cpp `find . -name '*.cpp'` )
+
+# Configure
 CFLAGS=$SLKCFLAGS \
 CXXFLAGS=$SLKCFLAGS \
 ./configure --build=$ARCH-slackware-linux \
             --host=$ARCH-slackware-linux \
             --prefix=/usr \
             --sysconfdir=/etc \
-            --enable-shared=yes \
+            --localstatedir=/var \
+            --mandir=/usr/man \
+            --docdir=/usr/doc/$NAME-$VERSION \
             --enable-static=no \
-            --enable-release \
-            --enable-optimize-memory=no \
-            --enable-optimizations \
-            --enable-bonjour \
-            --enable-hal \
+            --enable-shared=yes \
             --enable-dbus \
             --enable-dbus-control \
             --enable-telepathy \
+            --enable-optimize-memory=no \
+            --enable-optimizations \
             --enable-sout \
-            --enable-switcher \
-            --enable-shout \
-            --enable-httpd \
-            --enable-dc1394 \
+            --enable-lua \
             --enable-libproxy \
-            --enable-realrtsp \
-            --enable-smb \
-            --enable-gnomevfs \
+            --enable-httpd \
             --enable-vlm \
             --enable-growl \
             --enable-notify \
             --enable-taglib \
-            --enable-id3tag \
-            --enable-cdda \
-            --enable-cddax \
-            --enable-libcdio \
-            --enable-libcddb \
-            --enable-vcd \
-            --enable-vcdx \
-            --enable-libvcdinfo \
+            --enable-dc1394 \
             --enable-dv \
-            --enable-dvb \
             --enable-dvdread \
             --enable-dvdnav \
+            --enable-smb \
+            --enable-sftp \
+            --enable-dvbpsi \
             --enable-v4l \
             --enable-v4l2 \
             --enable-pvr \
+            --enable-gnomevfs \
+            --enable-vcdx \
+            --enable-vcd \
+            --enable-libcddb \
+            --enable-dvb \
             --enable-screen \
-            --enable-dvbpsi \
             --enable-ogg \
-            --enable-mad \
+            --enable-shout \
+            --enable-mkv \
+            --enable-mod \
             --enable-mpc \
-            --enable-faad \
-            --enable-flac \
-            --enable-real \
-            --enable-a52 \
-            --enable-speex \
-            --enable-vorbis \
-            --enable-fluidsynth \
-            --enable-opencv \
+            --enable-mad \
+            --enable-id3tag \
             --enable-avcodec \
+            --enable-libva \
+            --enable-switcher \
             --enable-avformat \
             --enable-swscale \
             --enable-postproc \
+            --enable-faad \
             --enable-twolame \
+            --enable-real \
+            --enable-realrtsp \
+            --enable-a52 \
+            --enable-flac \
             --enable-libmpeg2 \
+            --enable-vorbis \
+            --enable-speex \
             --enable-theora \
-            --enable-x264 \
             --enable-dirac \
-            --enable-aa \
-            --enable-caca \
-            --enable-fb \
-            --enable-ggi \
-            --enable-glx \
-            --enable-opengl \
-            --enable-snapshot \
-            --enable-svga \
-            --enable-sdl \
-            --enable-sdl-image \
-            --enable-x11 \
-            --enable-xvideo \
-            --enable-xvmc \
-            --enable-xinerama \
-            --enable-alsa \
-            --enable-oss \
-            --enable-arts \
-            --enable-esd \
-            --enable-jack \
-            --enable-pulse \
-            --enable-portaudio \
-            --enable-fbosd \
-            --enable-ncurses \
-            --enable-xosd \
-            --enable-remoteosd \
-            --disable-qt4 \
-            --enable-skins \
-            --disable-skins2 \
+            --enable-schroedinger \
             --enable-png \
+            --enable-x264 \
+            --enable-fluidsynth \
             --enable-zvbi \
             --enable-libass \
             --enable-asademux \
-            --enable-cmml \
             --enable-kate \
+            --enable-tiger \
+            --with-x \
+            --enable-xcb \
+            --enable-xvideo \
+            --enable-glx \
+            --enable-opengl \
+            --enable-sdl \
+            --enable-sdl-image \
             --enable-freetype \
             --enable-fribidi \
             --enable-fontconfig \
-            --enable-lua \
-            --enable-svg \
             --enable-libxml2 \
+            --enable-svg \
+            --enable-snapshot \
+            --enable-fb \
+            --enable-svgalib \
+            --enable-aa \
+            --enable-caca \
+            --enable-oss \
+            --enable-pulse \
+            --enable-portaudio \
+            --enable-alsa \
+            --enable-jack \
+            --enable-upnp \
+            --enable-skins2 \
+            --enable-qt4 \
+            --enable-ncurses \
+            --enable-xosd \
             --enable-visual \
-            --enable-galaktos \
-            --enable-goom \
             --enable-atmo \
+            --enable-bonjour \
+            --enable-udev \
             --enable-libgcrypt \
             --enable-gnutls \
             --enable-update-check \
             --enable-loader \
             --enable-vlc \
             --enable-mozilla || exit 2
-#           --enable-imgresample # not detected
 
+# Build & install
 make -j4 || exit 3
 make DESTDIR=$PKG install || exit 4
 
-# Additional installation steps
-install -m 755 -d $PKG/usr/share/applications
-install -m 644 $CWD/$NAME.desktop $PKG/usr/share/applications/$NAME.desktop
-
+# Prepare
 bin_perms $PKG
 ( cd $PKG; strip_bin; strip_lib )
 ( cd $SRC; create_docs $PKG $NAME-$VERSION )
+gzip_man $PKG
 
-# Copy service info
 install -m 755 -d $PKG/install
 install -m 644 $CWD/slack-desc     $PKG/install/slack-desc
 install -m 644 $CWD/slack-required $PKG/install/slack-required
@@ -178,14 +177,14 @@ install -m 755 -d $SBDIR
 install -m 644 $CWD/slack-desc         $SBDIR/slack-desc
 install -m 644 $CWD/slack-required     $SBDIR/slack-required
 install -m 644 $CWD/slack-suggests     $SBDIR/slack-suggests
-install -m 644 $CWD/$NAME.desktop      $SBDIR/$NAME.desktop
 install -m 644 $CWD/$NAME.SlackBuild   $SBDIR/$NAME.SlackBuild
 
+# Assemble
 PKGNAME=$NAME-$VERSION-$ARCH-$BUILD$MYIN
 cd $PKG
-makepkg -l y -c n $PKG_DIR/$PKGNAME.tgz
+makepkg -l y -c n $PKG_DIR/$PKGNAME.txz
 cd $PKG_DIR
-md5sum $PKGNAME.tgz > $PKGNAME.tgz.md5
+md5sum $PKGNAME.txz > $PKGNAME.txz.md5
 cp $CWD/slack-desc $PKGNAME.txt
 
 # Clean up (optionally)
