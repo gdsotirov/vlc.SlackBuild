@@ -20,13 +20,13 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: vlc.SlackBuild,v 1.4 2011/02/13 18:58:55 gsotirov Exp $
+# $Id: vlc.SlackBuild,v 1.5 2011/03/26 16:38:04 gsotirov Exp $
 #
 
 . ../slack-package.conf
 
 NAME=vlc
-VERSION=1.1.7
+VERSION=1.1.8
 BUILD=${BUILD:-1}
 ARCH=${ARCH:-i486}
 
@@ -73,6 +73,7 @@ CXXFLAGS=$SLKCFLAGS \
             --localstatedir=/var \
             --mandir=/usr/man \
             --docdir=/usr/doc/$NAME-$VERSION \
+            --disable-debug \
             --enable-static=no \
             --enable-shared=yes \
             --enable-dbus \
