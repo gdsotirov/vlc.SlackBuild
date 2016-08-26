@@ -5,12 +5,12 @@
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
 
-. /etc/slack-package.conf
+. ../../slack-package.conf
 
 NAME=vlc
-VERSION='0.9.8a'
-BUILD=1
+VERSION=1.0.6
 ARCH=${ARCH:-i486}
+BUILD=${BUILD:=1}
 
 CWD=${CWD:-`pwd`}
 TMP=${TMP:-/tmp}
@@ -43,6 +43,7 @@ CXXFLAGS=$SLKCFLAGS \
 ./configure --build=$ARCH-slackware-linux \
             --host=$ARCH-slackware-linux \
             --prefix=/usr \
+            --libdir=/usr/lib${LIBDIRSUFFIX} \
             --sysconfdir=/etc \
             --enable-shared=yes \
             --enable-static=no \
@@ -74,7 +75,6 @@ CXXFLAGS=$SLKCFLAGS \
             --enable-libcddb \
             --enable-vcd \
             --enable-vcdx \
-            --enable-libvcdinfo \
             --enable-dv \
             --enable-dvb \
             --enable-dvdread \
@@ -111,7 +111,6 @@ CXXFLAGS=$SLKCFLAGS \
             --enable-glx \
             --enable-opengl \
             --enable-snapshot \
-            --enable-svga \
             --enable-sdl \
             --enable-sdl-image \
             --enable-x11 \
@@ -120,8 +119,6 @@ CXXFLAGS=$SLKCFLAGS \
             --enable-xinerama \
             --enable-alsa \
             --enable-oss \
-            --enable-arts \
-            --enable-esd \
             --enable-jack \
             --enable-pulse \
             --enable-portaudio \
@@ -129,9 +126,8 @@ CXXFLAGS=$SLKCFLAGS \
             --enable-ncurses \
             --enable-xosd \
             --enable-remoteosd \
-            --disable-qt4 \
-            --enable-skins \
-            --disable-skins2 \
+            --enable-qt4 \
+            --enable-skins2 \
             --enable-png \
             --enable-zvbi \
             --enable-libass \
@@ -151,7 +147,6 @@ CXXFLAGS=$SLKCFLAGS \
             --enable-libgcrypt \
             --enable-gnutls \
             --enable-update-check \
-            --enable-loader \
             --enable-vlc \
             --enable-mozilla || exit 2
 #           --enable-imgresample # not detected
