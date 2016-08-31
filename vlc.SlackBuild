@@ -20,7 +20,7 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: vlc.SlackBuild,v 1.8 2016/08/30 19:50:58 gsotirov Exp $
+# $Id: vlc.SlackBuild,v 1.9 2016/08/31 13:32:19 gsotirov Exp $
 #
 
 . ../../slack-package.conf
@@ -62,10 +62,15 @@ fix_source
   sed -e 's/UTF8Length/utf8length/' \
       -e 's/UTF8Characters/utf8characters/' \
       -i.orig *.cpp `find . -name '*.cpp'` )
+# Fix source
+if [ -e $CWD/${NAME}-${VERSION}.diff ]; then
+  patch -p1 -b -z.orig < $CWD/${NAME}-${VERSION}.diff || exit 4
+fi
 
 # Configure
 CFLAGS=$SLKCFLAGS \
 CXXFLAGS=$SLKCFLAGS \
+FLAC_CFLAGS="-I/usr/include/FLAC" \
 ./configure --build=$ARCH-slackware-linux \
             --host=$ARCH-slackware-linux \
             --prefix=/usr \
@@ -195,6 +200,9 @@ install -m 755 -d $SBDIR
 install -m 644 $CWD/slack-desc         $SBDIR/slack-desc
 install -m 644 $CWD/slack-required     $SBDIR/slack-required
 install -m 644 $CWD/slack-suggests     $SBDIR/slack-suggests
+if [ -e $CWD/${NAME}-${VERSION}.diff ]; then
+  install -m 644 $CWD/${NAME}-${VERSION}.diff $SBDIR/${NAME}-${VERSION}.diff
+fi
 install -m 644 $CWD/$NAME.SlackBuild   $SBDIR/$NAME.SlackBuild
 
 # Assemble
