@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Slackware build script for VideoLAN Media Player (VLC)
-# Copyright (C) 2008-2012 Georgi D. Sotirov <gdsotirov@dir.bg>
+# Copyright (C) 2008-2016 Georgi D. Sotirov <gdsotirov@dir.bg>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,13 +20,13 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: vlc.SlackBuild,v 1.9 2016/08/31 13:32:19 gsotirov Exp $
+# $Id: vlc.SlackBuild,v 1.10 2016/09/19 20:33:43 gsotirov Exp $
 #
 
 . ../../slack-package.conf
 
 NAME=vlc
-VERSION=1.1.13
+VERSION=2.0.10
 ARCH=${ARCH:-i486}
 BUILD=${BUILD:-1}
 
@@ -57,19 +57,13 @@ cd $SRC
 fix_source
 
 # Apply patches
-# Fix NPString members name for Gecko 1.9.1
-( cd projects/mozilla
-  sed -e 's/UTF8Length/utf8length/' \
-      -e 's/UTF8Characters/utf8characters/' \
-      -i.orig *.cpp `find . -name '*.cpp'` )
-# Fix source
 if [ -e $CWD/${NAME}-${VERSION}.diff ]; then
   patch -p1 -b -z.orig < $CWD/${NAME}-${VERSION}.diff || exit 4
 fi
 
 # Configure
-CFLAGS=$SLKCFLAGS \
-CXXFLAGS=$SLKCFLAGS \
+CFLAGS="$SLKCFLAGS -I/usr/include/samba-4.0" \
+CXXFLAGS="$SLKCFLAGS -I/usr/include/samba-4.0" \
 FLAC_CFLAGS="-I/usr/include/FLAC" \
 ./configure --build=$ARCH-slackware-linux \
             --host=$ARCH-slackware-linux \
@@ -78,45 +72,41 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
             --localstatedir=/var \
             --mandir=/usr/man \
             --docdir=/usr/doc/$NAME-$VERSION \
-            --disable-debug \
-            --enable-static=no \
             --enable-shared=yes \
+            --enable-static=no \
             --enable-dbus \
             --enable-dbus-control \
             --enable-telepathy \
-            --enable-optimize-memory=no \
+            --disable-debug \
             --enable-optimizations \
+            --enable-optimize-memory=no \
             --enable-sout \
             --enable-lua \
-            --enable-libproxy \
             --enable-httpd \
             --enable-vlm \
-            --enable-growl \
-            --enable-notify \
-            --enable-taglib \
+            --enable-libproxy \
             --enable-dc1394 \
             --enable-dv \
             --enable-dvdread \
             --enable-dvdnav \
+            --enable-bluray \
             --enable-smb \
             --enable-sftp \
-            --enable-dvbpsi \
-            --enable-v4l \
             --enable-v4l2 \
             --enable-pvr \
-            --enable-gnomevfs \
             --enable-vcdx \
             --enable-vcd \
             --enable-libcddb \
-            --enable-dvb \
             --enable-screen \
+            --enable-realrtsp \
+            --enable-dvbpsi \
+            --enable-gme \
             --enable-ogg \
             --enable-shout \
             --enable-mkv \
             --enable-mod \
             --enable-mpc \
             --enable-mad \
-            --enable-id3tag \
             --enable-avcodec \
             --enable-libva \
             --enable-switcher \
@@ -126,7 +116,6 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
             --enable-faad \
             --enable-twolame \
             --enable-real \
-            --enable-realrtsp \
             --enable-a52 \
             --enable-flac \
             --enable-libmpeg2 \
@@ -140,33 +129,29 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
             --enable-fluidsynth \
             --enable-zvbi \
             --enable-libass \
-            --enable-asademux \
             --enable-kate \
             --enable-tiger \
+            --enable-egl \
             --with-x \
             --enable-xcb \
             --enable-xvideo \
             --enable-glx \
-            --enable-opengl \
             --enable-sdl \
             --enable-sdl-image \
             --enable-freetype \
             --enable-fribidi \
             --enable-fontconfig \
-            --enable-libxml2 \
             --enable-svg \
-            --enable-snapshot \
-            --enable-fb \
-            --enable-svgalib \
             --enable-aa \
             --enable-caca \
-            --enable-oss \
             --enable-pulse \
+            --enable-oss \
             --enable-portaudio \
             --enable-alsa \
             --enable-jack \
-            --enable-upnp \
+            --enable-samplerate \
             --enable-skins2 \
+            --enable-libtar \
             --enable-qt4 \
             --enable-ncurses \
             --enable-xosd \
@@ -174,11 +159,20 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
             --enable-atmo \
             --enable-bonjour \
             --enable-udev \
+            --enable-upnp \
+            --enable-libxml2 \
             --enable-libgcrypt \
             --enable-gnutls \
+            --enable-taglib \
             --enable-update-check \
-            --enable-vlc \
-            --enable-mozilla || exit 5
+            --enable-growl \
+            --enable-notify \
+            --enable-media-library \
+            --enable-sqlite \
+            --enable-vlc || exit 5
+
+#           --enable-opencv  # versions incompatibility
+#           --enable-ncurses # Requires /usr/lib${LIBDIRSUFFIX}/pkgconfig/ncurses.pc and ncursesw.pc
 
 # Build & install
 make V=1 -j4 || exit 6
