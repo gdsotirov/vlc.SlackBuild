@@ -1,0 +1,151 @@
+# Patch to fix VLC 2.1.x build with FFmpeg >= 2.3.x, FreeRDP 1.2.x and OpenCV 3.0.x
+# Loose requirement on libavcodec major version to < 57
+diff -urNad vlc-2.1.6-orig/configure vlc-2.1.6/configure
+--- vlc-2.1.6-orig/configure	2015-02-26 22:30:10.000000000 +0200
++++ vlc-2.1.6/configure	2016-09-20 22:20:06.000000000 +0300
+@@ -36012,8 +36012,8 @@
+ $as_echo "yes" >&6; }
+ 
+     if test -n "$PKG_CONFIG" && \
+-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libavcodec < 56\""; } >&5
+-  ($PKG_CONFIG --exists --print-errors "libavcodec < 56") 2>&5
++    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libavcodec < 57\""; } >&5
++  ($PKG_CONFIG --exists --print-errors "libavcodec < 57") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+# Fix FreeRDP 1.2.x compatibility
+# See https://gitweb.gentoo.org/repo/gentoo.git/tree/media-video/vlc/files/vlc-2.1.0-newer-rdp.patch?id=56bd759df1d0c750a065b8c845e93d5dfa6b549d
+# and https://gitweb.gentoo.org/repo/gentoo.git/tree/media-video/vlc/files/vlc-2.2.0-rdp-1.2.0.patch
+diff -urNad vlc-2.1.6-orig/modules/access/rdp.c vlc-2.1.6/modules/access/rdp.c
+--- vlc-2.1.6-orig/modules/access/rdp.c	2015-01-22 15:27:37.000000000 +0200
++++ vlc-2.1.6/modules/access/rdp.c	2016-09-20 22:23:08.000000000 +0300
+@@ -41,6 +41,22 @@
+ #include <freerdp/channels/channels.h>
+ #include <freerdp/gdi/gdi.h>
+ 
++#if !defined(FREERDP_INTERFACE_VERSION)
++# include <freerdp/version.h>
++#endif
++
++#if !defined(FREERDP_VERSION_MAJOR) || \
++    (defined(FREERDP_VERSION_MAJOR) && !(FREERDP_VERSION_MAJOR >= 1 && FREERDP_VERSION_MINOR >= 1 ))
++# define SoftwareGdi sw_gdi
++# define Fullscreen fullscreen
++# define ServerHostname hostname
++# define Username username
++# define Password password
++# define ServerPort port
++# define EncryptionMethods encryption
++# define ContextSize context_size
++#endif
++
+ #include <errno.h>
+ #ifdef HAVE_POLL
+ # include <poll.h>
+@@ -67,7 +83,7 @@
+     set_category( CAT_INPUT )
+     set_subcategory( SUBCAT_INPUT_ACCESS )
+     set_description( N_("RDP Remote Desktop") )
+-    set_capability( "access_demux", 10 )
++    set_capability( "access_demux", 0 )
+ 
+     add_string( CFG_PREFIX "user", NULL, RDP_USER, RDP_USER, false )
+         change_safe()
+@@ -198,15 +214,15 @@
+     demux_sys_t *p_sys = p_vlccontext->p_demux->p_sys;
+ 
+     /* Configure connexion */
+-    p_instance->settings->sw_gdi = true; /* render in buffer */
+-    p_instance->settings->fullscreen = true;
+-    p_instance->settings->hostname = strdup( p_sys->psz_hostname );
+-    p_instance->settings->username =
++    p_instance->settings->SoftwareGdi = true; /* render in buffer */
++    p_instance->settings->Fullscreen = true;
++    p_instance->settings->ServerHostname = strdup( p_sys->psz_hostname );
++    p_instance->settings->Username =
+             var_InheritString( p_vlccontext->p_demux, CFG_PREFIX "user" );
+-    p_instance->settings->password =
++    p_instance->settings->Password =
+             var_InheritString( p_vlccontext->p_demux, CFG_PREFIX "password" );
+-    p_instance->settings->port = p_sys->i_port;
+-    p_instance->settings->encryption =
++    p_instance->settings->ServerPort = p_sys->i_port;
++    p_instance->settings->EncryptionMethods =
+             var_InheritBool( p_vlccontext->p_demux, CFG_PREFIX "encrypt" );
+ 
+     return true;
+@@ -217,15 +233,28 @@
+     vlcrdp_context_t * p_vlccontext = (vlcrdp_context_t *) p_instance->context;
+ 
+     msg_Dbg( p_vlccontext->p_demux, "connected to desktop %dx%d (%d bpp)",
++#if defined(FREERDP_VERSION_MAJOR)  && (FREERDP_VERSION_MAJOR >= 1 && FREERDP_VERSION_MINOR >= 1 )
++             p_instance->settings->DesktopWidth,
++             p_instance->settings->DesktopHeight,
++             p_instance->settings->ColorDepth
++#else
+              p_instance->settings->width,
+              p_instance->settings->height,
+-             p_instance->settings->color_depth );
++             p_instance->settings->color_depth
++#endif
++             );
+ 
+     p_instance->update->DesktopResize = desktopResizeHandler;
+     p_instance->update->BeginPaint = beginPaintHandler;
+     p_instance->update->EndPaint = endPaintHandler;
+ 
+-    gdi_init( p_instance, CLRBUF_16BPP | CLRBUF_24BPP | CLRBUF_32BPP, NULL );
++    gdi_init( p_instance,
++                CLRBUF_16BPP |
++#if defined(FREERDP_VERSION_MAJOR) && defined(FREERDP_VERSION_MINOR) && \
++    !(FREERDP_VERSION_MAJOR > 1 || (FREERDP_VERSION_MAJOR == 1 && FREERDP_VERSION_MINOR >= 2))
++                CLRBUF_24BPP |
++#endif
++                CLRBUF_32BPP, NULL );
+ 
+     desktopResizeHandler( p_instance->context );
+     return true;
+@@ -399,7 +428,9 @@
+     if ( p_sys->f_fps <= 0 ) p_sys->f_fps = 1.0;
+     p_sys->i_frame_interval = 1000000 / p_sys->f_fps;
+ 
++#if FREERDP_VERSION_MAJOR == 1 && FREERDP_VERSION_MINOR < 2
+     freerdp_channels_global_init();
++#endif
+ 
+     p_sys->p_instance = freerdp_new();
+     if ( !p_sys->p_instance )
+@@ -415,7 +446,7 @@
+     p_sys->p_instance->Authenticate = authenticateHandler;
+ 
+     /* Set up context handlers and let it be allocated */
+-    p_sys->p_instance->context_size = sizeof( vlcrdp_context_t );
++    p_sys->p_instance->ContextSize = sizeof( vlcrdp_context_t );
+     freerdp_context_new( p_sys->p_instance );
+ 
+     vlcrdp_context_t * p_vlccontext = (vlcrdp_context_t *) p_sys->p_instance->context;
+@@ -475,7 +506,9 @@
+ 
+     freerdp_disconnect( p_sys->p_instance );
+     freerdp_free( p_sys->p_instance );
++#if FREERDP_VERSION_MAJOR == 1 && FREERDP_VERSION_MINOR < 2
+     freerdp_channels_global_uninit();
++#endif
+ 
+     if ( p_sys->p_block )
+         block_Release( p_sys->p_block );
+# Fix OpenCV 3.0 compatibility
+# See https://gitweb.gentoo.org/repo/gentoo.git/tree/media-video/vlc/files/opencv-3.0.0.patch
+diff -urNad vlc-2.1.6-orig/modules/video_filter/opencv_example.cpp vlc-2.1.6/modules/video_filter/opencv_example.cpp
+--- vlc-2.1.6-orig/modules/video_filter/opencv_example.cpp	2015-01-22 15:27:38.000000000 +0200
++++ vlc-2.1.6/modules/video_filter/opencv_example.cpp	2016-09-20 22:24:21.000000000 +0300
+@@ -41,6 +41,8 @@
+ 
+ #include <opencv2/core/core_c.h>
+ #include <opencv2/core/core.hpp>
++#include <opencv2/imgproc/imgproc_c.h>
++#include <opencv2/imgproc/imgproc.hpp>
+ #include <opencv2/objdetect/objdetect.hpp>
+ 
+ /*****************************************************************************
