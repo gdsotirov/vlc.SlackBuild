@@ -20,13 +20,13 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: vlc.SlackBuild,v 1.10 2016/09/19 20:33:43 gsotirov Exp $
+# $Id: vlc.SlackBuild,v 1.11 2016/09/20 19:48:01 gsotirov Exp $
 #
 
 . ../../slack-package.conf
 
 NAME=vlc
-VERSION=2.0.10
+VERSION=2.1.6
 ARCH=${ARCH:-i486}
 BUILD=${BUILD:-1}
 
@@ -75,8 +75,6 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
             --enable-shared=yes \
             --enable-static=no \
             --enable-dbus \
-            --enable-dbus-control \
-            --enable-telepathy \
             --disable-debug \
             --enable-optimizations \
             --enable-optimize-memory=no \
@@ -84,20 +82,20 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
             --enable-lua \
             --enable-httpd \
             --enable-vlm \
-            --enable-libproxy \
             --enable-dc1394 \
-            --enable-dv \
+            --enable-dv1394 \
             --enable-dvdread \
             --enable-dvdnav \
             --enable-bluray \
-            --enable-smb \
+            --enable-opencv \
+            --enable-smbclient \
             --enable-sftp \
             --enable-v4l2 \
-            --enable-pvr \
-            --enable-vcdx \
             --enable-vcd \
             --enable-libcddb \
             --enable-screen \
+            --enable-libvnc \
+            --enable-libfreerdp \
             --enable-realrtsp \
             --enable-dvbpsi \
             --enable-gme \
@@ -109,13 +107,12 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
             --enable-mad \
             --enable-avcodec \
             --enable-libva \
-            --enable-switcher \
+            --enable-vda \
             --enable-avformat \
             --enable-swscale \
             --enable-postproc \
             --enable-faad \
             --enable-twolame \
-            --enable-real \
             --enable-a52 \
             --enable-flac \
             --enable-libmpeg2 \
@@ -145,17 +142,14 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
             --enable-aa \
             --enable-caca \
             --enable-pulse \
-            --enable-oss \
-            --enable-portaudio \
             --enable-alsa \
             --enable-jack \
             --enable-samplerate \
             --enable-skins2 \
             --enable-libtar \
-            --enable-qt4 \
+            --enable-qt \
             --enable-ncurses \
-            --enable-xosd \
-            --enable-visual \
+            --enable-vsxu \
             --enable-atmo \
             --enable-bonjour \
             --enable-udev \
@@ -167,12 +161,10 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
             --enable-update-check \
             --enable-growl \
             --enable-notify \
-            --enable-media-library \
-            --enable-sqlite \
             --enable-vlc || exit 5
 
+#           --enable-fdkaac  # non-free 
 #           --enable-opencv  # versions incompatibility
-#           --enable-ncurses # Requires /usr/lib${LIBDIRSUFFIX}/pkgconfig/ncurses.pc and ncursesw.pc
 
 # Build & install
 make V=1 -j4 || exit 6
