@@ -20,7 +20,7 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: vlc.SlackBuild,v 1.9 2016/08/31 13:32:19 gsotirov Exp $
+# $Id: vlc.SlackBuild,v 1.9.2.1 2016/10/12 19:10:38 gsotirov Exp $
 #
 
 . ../../slack-package.conf
@@ -74,6 +74,7 @@ FLAC_CFLAGS="-I/usr/include/FLAC" \
 ./configure --build=$ARCH-slackware-linux \
             --host=$ARCH-slackware-linux \
             --prefix=/usr \
+            --libdir=/usr/lib${LIBDIRSUFFIX} \
             --sysconfdir=/etc \
             --localstatedir=/var \
             --mandir=/usr/man \
