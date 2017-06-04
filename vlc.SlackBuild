@@ -20,13 +20,13 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: vlc.SlackBuild,v 1.13 2017/05/21 15:08:31 gsotirov Exp $
+# $Id: vlc.SlackBuild,v 1.14 2017/06/04 19:26:24 gsotirov Exp $
 #
 
 . ../../slack-package.conf
 
 NAME=vlc
-VERSION=2.2.5.1
+VERSION=2.2.6
 ARCH=${ARCH:-i586}
 BUILD=${BUILD:-1}
 
