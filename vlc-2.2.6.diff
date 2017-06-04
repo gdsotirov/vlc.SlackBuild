@@ -1,9 +1,9 @@
 # Patch to fix compatibility with FFmpeg 3.x
 # See https://gitweb.gentoo.org/repo/gentoo.git/tree/media-video/vlc/files/vlc-2.2.4-ffmpeg3.patch
 # See https://gitweb.gentoo.org/repo/gentoo.git/tree/media-video/vlc/files/vlc-2.2.4-relax_ffmpeg.patch
-diff -urNad vlc-2.2.5.1-orig/configure.ac vlc-2.2.5.1/configure.ac
---- vlc-2.2.5.1-orig/configure.ac	2017-04-06 17:39:47.000000000 +0300
-+++ vlc-2.2.5.1/configure.ac	2017-05-21 17:27:48.867664809 +0300
+diff -urNad vlc-2.2.6-orig/configure.ac vlc-2.2.6/configure.ac
+--- vlc-2.2.6-orig/configure.ac	2017-05-24 13:40:16.000000000 +0300
++++ vlc-2.2.6/configure.ac	2017-06-04 22:23:05.052899011 +0300
 @@ -2317,8 +2317,8 @@
  [  --enable-avcodec        libavcodec codec (default enabled)])
  AS_IF([test "${enable_avcodec}" != "no"], [
@@ -48,9 +48,9 @@ diff -urNad vlc-2.2.5.1-orig/configure.ac vlc-2.2.5.1/configure.ac
        ])
        ;;
    esac
-diff -urNad vlc-2.2.5.1-orig/modules/codec/avcodec/audio.c vlc-2.2.5.1/modules/codec/avcodec/audio.c
---- vlc-2.2.5.1-orig/modules/codec/avcodec/audio.c	2015-12-08 18:18:56.000000000 +0200
-+++ vlc-2.2.5.1/modules/codec/avcodec/audio.c	2017-05-21 17:27:50.633521533 +0300
+diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/audio.c vlc-2.2.6/modules/codec/avcodec/audio.c
+--- vlc-2.2.6-orig/modules/codec/avcodec/audio.c	2015-12-08 18:18:56.000000000 +0200
++++ vlc-2.2.6/modules/codec/avcodec/audio.c	2017-06-04 22:23:05.105894705 +0300
 @@ -39,8 +39,6 @@
  #include <libavcodec/avcodec.h>
  #include <libavutil/mem.h>
@@ -60,9 +60,9 @@ diff -urNad vlc-2.2.5.1-orig/modules/codec/avcodec/audio.c vlc-2.2.5.1/modules/c
  #include "avcodec.h"
  
  /*****************************************************************************
-diff -urNad vlc-2.2.5.1-orig/modules/codec/avcodec/encoder.c vlc-2.2.5.1/modules/codec/avcodec/encoder.c
---- vlc-2.2.5.1-orig/modules/codec/avcodec/encoder.c	2015-10-21 19:36:45.000000000 +0300
-+++ vlc-2.2.5.1/modules/codec/avcodec/encoder.c	2017-05-21 17:27:50.964494678 +0300
+diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/encoder.c vlc-2.2.6/modules/codec/avcodec/encoder.c
+--- vlc-2.2.6-orig/modules/codec/avcodec/encoder.c	2015-10-21 19:36:45.000000000 +0300
++++ vlc-2.2.6/modules/codec/avcodec/encoder.c	2017-06-04 22:23:05.149891130 +0300
 @@ -41,7 +41,6 @@
  #include <vlc_cpu.h>
  
@@ -125,9 +125,9 @@ diff -urNad vlc-2.2.5.1-orig/modules/codec/avcodec/encoder.c vlc-2.2.5.1/modules
          if( p_sys->b_variable )
              p_sys->frame->nb_samples = p_aout_buf->i_nb_samples;
          else
-diff -urNad vlc-2.2.5.1-orig/modules/codec/avcodec/vaapi.c vlc-2.2.5.1/modules/codec/avcodec/vaapi.c
---- vlc-2.2.5.1-orig/modules/codec/avcodec/vaapi.c	2014-11-16 20:57:58.000000000 +0200
-+++ vlc-2.2.5.1/modules/codec/avcodec/vaapi.c	2017-05-21 17:27:51.110482833 +0300
+diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/vaapi.c vlc-2.2.6/modules/codec/avcodec/vaapi.c
+--- vlc-2.2.6-orig/modules/codec/avcodec/vaapi.c	2014-11-16 20:57:58.000000000 +0200
++++ vlc-2.2.6/modules/codec/avcodec/vaapi.c	2017-06-04 22:23:05.200886986 +0300
 @@ -595,7 +595,7 @@
          return err;
  
@@ -137,9 +137,9 @@ diff -urNad vlc-2.2.5.1-orig/modules/codec/avcodec/vaapi.c vlc-2.2.5.1/modules/c
      p_va->setup = Setup;
      p_va->get = Get;
      p_va->release = Release;
-diff -urNad vlc-2.2.5.1-orig/modules/codec/avcodec/video.c vlc-2.2.5.1/modules/codec/avcodec/video.c
---- vlc-2.2.5.1-orig/modules/codec/avcodec/video.c	2016-09-27 10:56:26.000000000 +0300
-+++ vlc-2.2.5.1/modules/codec/avcodec/video.c	2017-05-21 17:27:51.264470339 +0300
+diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/video.c vlc-2.2.6/modules/codec/avcodec/video.c
+--- vlc-2.2.6-orig/modules/codec/avcodec/video.c	2016-09-27 10:56:26.000000000 +0300
++++ vlc-2.2.6/modules/codec/avcodec/video.c	2017-06-04 22:23:05.279880567 +0300
 @@ -108,8 +108,8 @@
  static int  ffmpeg_GetFrameBuf    ( struct AVCodecContext *, AVFrame * );
  static void ffmpeg_ReleaseFrameBuf( struct AVCodecContext *, AVFrame * );
