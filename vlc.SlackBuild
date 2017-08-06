@@ -20,7 +20,7 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: vlc.SlackBuild,v 1.14 2017/06/04 19:26:24 gsotirov Exp $
+# $Id: vlc.SlackBuild,v 1.15 2017/08/06 15:32:17 gsotirov Exp $
 #
 
 . ../../slack-package.conf
@@ -29,6 +29,7 @@ NAME=vlc
 VERSION=2.2.6
 ARCH=${ARCH:-i586}
 BUILD=${BUILD:-1}
+NUMJOBS=${NUMJOBS:-4}
 
 CWD=${CWD:-`pwd`}
 TMP=${TMP:-/tmp}
@@ -171,7 +172,7 @@ autoreconf -vif || exit 50
 #           --enable-opencv  # versions incompatibility
 
 # Build & install
-make V=1 -j4 || exit 6
+make V=1 -j${NUMJOBS} || exit 6
 make V=1 DESTDIR=$PKG install || exit 7
 
 # Prepare
