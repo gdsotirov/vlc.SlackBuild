@@ -1,9 +1,11 @@
 # Patch to fix compatibility with FFmpeg 3.x
 # See https://gitweb.gentoo.org/repo/gentoo.git/tree/media-video/vlc/files/vlc-2.2.4-ffmpeg3.patch
+# See https://gitweb.gentoo.org/repo/gentoo.git/tree/media-video/vlc/files/vlc-2.2.4-libav-11.7.patch
 # See https://gitweb.gentoo.org/repo/gentoo.git/tree/media-video/vlc/files/vlc-2.2.4-relax_ffmpeg.patch
-diff -urNad vlc-2.2.6-orig/configure.ac vlc-2.2.6/configure.ac
---- vlc-2.2.6-orig/configure.ac	2017-05-24 13:40:16.000000000 +0300
-+++ vlc-2.2.6/configure.ac	2017-06-04 22:23:05.052899011 +0300
+# See https://gitweb.gentoo.org/repo/gentoo.git/tree/media-video/vlc/files/vlc-2.2.8-libupnp-compat.patch
+diff -urNad vlc-2.2.8-orig/configure.ac vlc-2.2.8/configure.ac
+--- vlc-2.2.8-orig/configure.ac	2017-11-21 20:35:05.000000000 +0200
++++ vlc-2.2.8/configure.ac	2018-01-21 14:19:56.895278615 +0200
 @@ -2317,8 +2317,8 @@
  [  --enable-avcodec        libavcodec codec (default enabled)])
  AS_IF([test "${enable_avcodec}" != "no"], [
@@ -48,21 +50,28 @@ diff -urNad vlc-2.2.6-orig/configure.ac vlc-2.2.6/configure.ac
        ])
        ;;
    esac
-diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/audio.c vlc-2.2.6/modules/codec/avcodec/audio.c
---- vlc-2.2.6-orig/modules/codec/avcodec/audio.c	2015-12-08 18:18:56.000000000 +0200
-+++ vlc-2.2.6/modules/codec/avcodec/audio.c	2017-06-04 22:23:05.105894705 +0300
-@@ -39,8 +39,6 @@
+diff -urNad vlc-2.2.8-orig/modules/codec/avcodec/audio.c vlc-2.2.8/modules/codec/avcodec/audio.c
+--- vlc-2.2.8-orig/modules/codec/avcodec/audio.c	2015-12-08 18:18:56.000000000 +0200
++++ vlc-2.2.8/modules/codec/avcodec/audio.c	2018-01-21 14:26:16.987941850 +0200
+@@ -36,12 +36,13 @@
+ #include <vlc_codec.h>
+ #include <vlc_avcodec.h>
+ 
++#include "avcodec.h"
++
  #include <libavcodec/avcodec.h>
  #include <libavutil/mem.h>
  
 -#include <libavutil/audioconvert.h>
--
- #include "avcodec.h"
++#include <libavutil/channel_layout.h>
+ 
+-#include "avcodec.h"
  
  /*****************************************************************************
-diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/encoder.c vlc-2.2.6/modules/codec/avcodec/encoder.c
---- vlc-2.2.6-orig/modules/codec/avcodec/encoder.c	2015-10-21 19:36:45.000000000 +0300
-+++ vlc-2.2.6/modules/codec/avcodec/encoder.c	2017-06-04 22:23:05.149891130 +0300
+  * decoder_sys_t : decoder descriptor
+diff -urNad vlc-2.2.8-orig/modules/codec/avcodec/encoder.c vlc-2.2.8/modules/codec/avcodec/encoder.c
+--- vlc-2.2.8-orig/modules/codec/avcodec/encoder.c	2015-10-21 19:36:45.000000000 +0300
++++ vlc-2.2.8/modules/codec/avcodec/encoder.c	2018-01-21 14:19:56.992270368 +0200
 @@ -41,7 +41,6 @@
  #include <vlc_cpu.h>
  
@@ -125,9 +134,9 @@ diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/encoder.c vlc-2.2.6/modules/cod
          if( p_sys->b_variable )
              p_sys->frame->nb_samples = p_aout_buf->i_nb_samples;
          else
-diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/vaapi.c vlc-2.2.6/modules/codec/avcodec/vaapi.c
---- vlc-2.2.6-orig/modules/codec/avcodec/vaapi.c	2014-11-16 20:57:58.000000000 +0200
-+++ vlc-2.2.6/modules/codec/avcodec/vaapi.c	2017-06-04 22:23:05.200886986 +0300
+diff -urNad vlc-2.2.8-orig/modules/codec/avcodec/vaapi.c vlc-2.2.8/modules/codec/avcodec/vaapi.c
+--- vlc-2.2.8-orig/modules/codec/avcodec/vaapi.c	2014-11-16 20:57:58.000000000 +0200
++++ vlc-2.2.8/modules/codec/avcodec/vaapi.c	2018-01-21 14:19:57.076263227 +0200
 @@ -595,7 +595,7 @@
          return err;
  
@@ -137,9 +146,9 @@ diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/vaapi.c vlc-2.2.6/modules/codec
      p_va->setup = Setup;
      p_va->get = Get;
      p_va->release = Release;
-diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/video.c vlc-2.2.6/modules/codec/avcodec/video.c
---- vlc-2.2.6-orig/modules/codec/avcodec/video.c	2016-09-27 10:56:26.000000000 +0300
-+++ vlc-2.2.6/modules/codec/avcodec/video.c	2017-06-04 22:23:05.279880567 +0300
+diff -urNad vlc-2.2.8-orig/modules/codec/avcodec/video.c vlc-2.2.8/modules/codec/avcodec/video.c
+--- vlc-2.2.8-orig/modules/codec/avcodec/video.c	2017-07-13 12:16:59.000000000 +0300
++++ vlc-2.2.8/modules/codec/avcodec/video.c	2018-01-21 14:19:57.209251921 +0200
 @@ -108,8 +108,8 @@
  static int  ffmpeg_GetFrameBuf    ( struct AVCodecContext *, AVFrame * );
  static void ffmpeg_ReleaseFrameBuf( struct AVCodecContext *, AVFrame * );
@@ -151,7 +160,7 @@ diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/video.c vlc-2.2.6/modules/codec
  
  static uint32_t ffmpeg_CodecTag( vlc_fourcc_t fcc )
  {
-@@ -234,7 +234,7 @@
+@@ -236,7 +236,7 @@
      p_sys->p_codec = p_codec;
      p_sys->i_codec_id = i_codec_id;
      p_sys->psz_namecodec = psz_namecodec;
@@ -160,7 +169,7 @@ diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/video.c vlc-2.2.6/modules/codec
      p_sys->b_delayed_open = true;
      p_sys->p_va = NULL;
      vlc_sem_init( &p_sys->sem_mt, 0 );
-@@ -446,7 +446,7 @@
+@@ -448,7 +448,7 @@
      if( ffmpeg_OpenCodec( p_dec ) < 0 )
      {
          msg_Err( p_dec, "cannot open codec (%s)", p_sys->psz_namecodec );
@@ -169,7 +178,7 @@ diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/video.c vlc-2.2.6/modules/codec
          vlc_sem_destroy( &p_sys->sem_mt );
          free( p_sys );
          return VLC_EGENERIC;
-@@ -847,7 +847,7 @@
+@@ -849,7 +849,7 @@
      wait_mt( p_sys );
  
      if( p_sys->p_ff_pic )
@@ -178,7 +187,7 @@ diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/video.c vlc-2.2.6/modules/codec
  
      if( p_sys->p_va )
          vlc_va_Delete( p_sys->p_va );
-@@ -1334,8 +1334,8 @@
+@@ -1336,8 +1336,8 @@
  }
  #endif
  
@@ -189,3 +198,24 @@ diff -urNad vlc-2.2.6-orig/modules/codec/avcodec/video.c vlc-2.2.6/modules/codec
  {
      decoder_t *p_dec = p_context->opaque;
      decoder_sys_t *p_sys = p_dec->p_sys;
+diff -urNad vlc-2.2.8-orig/modules/services_discovery/upnp.cpp vlc-2.2.8/modules/services_discovery/upnp.cpp
+--- vlc-2.2.8-orig/modules/services_discovery/upnp.cpp	2017-09-07 13:26:08.000000000 +0300
++++ vlc-2.2.8/modules/services_discovery/upnp.cpp	2018-01-21 17:46:27.612629147 +0200
+@@ -40,7 +40,7 @@
+ #include <assert.h>
+ #include <limits.h>
+ 
+-#if UPNP_VERSION < 10800
++#if UPNP_VERSION < 10623
+ /*
+  * Compat functions and typedefs for libupnp prior to 1.8
+  */
+@@ -75,7 +75,7 @@
+   return p_s->Sid;
+ }
+ #else
+-typedef const void* UpnpEventPtr;
++typedef void* UpnpEventPtr;
+ #endif
+ 
+ /*
